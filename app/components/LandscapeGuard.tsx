@@ -6,7 +6,10 @@ export default function LandscapeGuard({children}:{children:ReactNode}){
   const prompt=useRef<HTMLHeadingElement>(null),previousFocus=useRef<HTMLElement|null>(null);
   useEffect(()=>{
     const query=matchMedia('(max-width: 1024px) and (orientation: portrait) and (any-pointer: coarse)');
-    const update=()=>setPortrait(query.matches);update();query.addEventListener('change',update);
+    const update=()=>{
+      if(/^\/review\/responsive(?:-desktop)?$/.test(window.location.pathname)){setPortrait(false);return;}
+      setPortrait(query.matches);
+    };update();query.addEventListener('change',update);
     setCanLock(typeof document.documentElement.requestFullscreen==='function'&&typeof (screen.orientation as ScreenOrientation&{lock?:unknown})?.lock==='function');
     return()=>query.removeEventListener('change',update);
   },[]);

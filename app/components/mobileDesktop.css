@@ -110,3 +110,46 @@
   [data-mobile-layout="review"] .mac-help-body h1 { font-size: 18px; }
   [data-mobile-layout="review"] .mac-desktop .mac-notes-window { --notes-toolbar-height: 34px; --notes-tool-size: 28px; --notes-icon-size: 16px; }
 }
+
+@media (orientation: portrait) and (max-width: 1024px) {
+  .windows-desktop-page[data-responsive="true"],
+  [data-responsive="true"].windows-desktop-canvas,
+  [data-responsive="true"] .windows-desktop-canvas {
+    width: 100vw;
+    height: 100dvh;
+    --desktop-h: 100dvh;
+  }
+  [data-responsive="true"] .mac-desktop-icons {
+    left: 8px;
+    right: 8px;
+    top: 6px;
+    bottom: auto;
+    width: auto;
+    height: 74px;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 4px;
+  }
+  [data-responsive="true"] .mac-desktop-widgets {
+    top: auto;
+    right: 8px;
+    bottom: 64px;
+    left: 8px;
+    width: auto;
+    max-width: none;
+    max-height: 34dvh;
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+  [data-responsive="true"] .mac-desktop-widgets > * { flex: 0 0 min(280px, 78vw); }
+  [data-responsive="true"] .mac-desktop .win-window:not(.is-fullscreen):not(.is-maximized) {
+    left: 8px !important;
+    top: 86px !important;
+    width: calc(100% - 16px) !important;
+    height: calc(100% - 86px - 34dvh - 72px) !important;
+  }
+  [data-responsive="true"] .windows-terminal-prompt input { font-size: 16px; }
+  [data-responsive="true"] .mac-dock-region { height: 56px; }
+}

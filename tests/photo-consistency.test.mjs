@@ -27,8 +27,12 @@ test('photo staging propagates matching media through direct pans, posters, and 
   assert.match(room,/coherentPhotos = false/);
   assert.match(room,/photosMedia=coherentPhotos\?PHOTO_CONSISTENCY_MEDIA:PHOTOS_MEDIA/);
   assert.match(room,/\$\{photosMedia\}photos-still.webp/);
-  assert.match(room,/\$\{photosMedia\}\$\{phase\}.mp4/);
-  assert.match(room,/<VinylShelf coherentPhotos=\{coherentPhotos\}/);
+  assert.match(room,/photos: photosMedia/);
+  assert.match(room,/src=\{sceneTransitionSrc\(phase, media\)\}/);
+  const cache=read('app/components/sceneTransitionCache.ts');
+  assert.match(cache,/phase\.startsWith\('photos'\)/);
+  assert.match(cache,/\$\{media\.photos\}\$\{phase\}\.mp4/);
+  assert.match(room,/<VinylShelf[^>]*coherentPhotos=\{coherentPhotos\}/);
   assert.match(shelf,/getShelfPlates\(coherentPhotos,coherentBooks\)/);
   assert.match(shelf,/shelfTravelClip\(travel.from,travel.to,coherentPhotos,coherentBooks\)/);
   assert.match(shelf,/<ShelfScene review=\{review\} coherentPhotos=\{coherentPhotos\}/);

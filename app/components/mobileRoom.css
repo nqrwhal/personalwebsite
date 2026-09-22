@@ -31,3 +31,12 @@
   .cinematic-room[data-mobile-layout="true"] .diploma-lightbox{max-width:calc(100vw - 16px);max-height:calc(100dvh - 12px);padding:40px 8px 8px;}
   .cinematic-room[data-mobile-layout="true"] .diploma-lightbox img{max-height:calc(100dvh - 64px);}
 }
+/* Portrait review: one shared 16:9 frame for the room, the camera move, and the landing scene. */
+@media (orientation: portrait) and (max-width: 1024px) {
+  .cinematic-room[data-responsive="true"][data-viewport-fit="cover"] :is(.cinematic-stage, .cinematic-handoff, .vinyl-render-stage) {
+    width: min(100vw, 177.777777778dvh);
+  }
+  .cinematic-room[data-responsive="true"][data-viewport-fit="cover"] .cinematic-diploma img {
+    object-fit: contain !important;
+  }
+}

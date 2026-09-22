@@ -17,7 +17,7 @@ test('approved mobile room layout is enabled without preview-only redirect suppr
   assert.match(room, /data-mobile-layout=\{mobileLayout\}/);
   assert.match(room, /<VinylShelf[^>]*mobileLayout=\{mobileLayout\}/);
   assert.match(shelf, /<ShelfScene[^>]*mobileLayout=\{mobileLayout\}/);
-  assert.match(room, /src=\{mobileLayout&&shelfReview\?'\/review\/mobile-desktop':'\/desktop'\}/);
+  assert.match(room, /responsiveLayout\?'\/review\/responsive-desktop':mobileLayout&&shelfReview\?'\/review\/mobile-desktop':'\/desktop'/);
 });
 
 test('phone controls use the right side and leave room around inspected objects', () => {

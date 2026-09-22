@@ -11,11 +11,12 @@ import type { ReportBook } from './reportBook';
 import { swipeBookDirection, swipeCubbyDirection, wheelPixels } from "./shelfGestures";
 import {PHOTO_LABELS} from './shelfPolaroids';
 import {usePanHandoff,getShelfPlates,shelfTravelClip} from './panHandoff';
+import {primeSceneClip,shelfExitSrc} from './sceneTransitionCache';
 import "./vinylShelf.css";
 
 type Travel = { from: number; to: number; exit: boolean };
 
-export default function BookshelfExperience({ onExit, onReady: onDestinationReady, motion, initialCubby = 1, review=false, coherentPhotos=false, coherentBooks=false, mobileLayout=false, activityCues=false, refinedCues=false, cueFadeIn=false, cueMemory, cueInput='auto' }: { onExit: (cubby: number) => void; onReady?:()=>void; motion: boolean; initialCubby?: number; review?:boolean; coherentPhotos?:boolean; coherentBooks?:boolean; mobileLayout?:boolean; activityCues?:boolean; refinedCues?:boolean; cueFadeIn?:boolean; cueMemory?:CueVisitState; cueInput?:'auto'|'mouse'|'touch' }) {
+export default function BookshelfExperience({ onExit, onReady: onDestinationReady, motion, initialCubby = 1, review=false, coherentPhotos=false, coherentBooks=false, mobileLayout=false, responsiveLayout=false, preparing=false, activityCues=false, refinedCues=false, cueFadeIn=false, cueMemory, cueInput='auto' }: { onExit: (cubby: number) => void; onReady?:()=>void; motion: boolean; initialCubby?: number; review?:boolean; coherentPhotos?:boolean; coherentBooks?:boolean; mobileLayout?:boolean; responsiveLayout?:boolean; preparing?:boolean; activityCues?:boolean; refinedCues?:boolean; cueFadeIn?:boolean; cueMemory?:CueVisitState; cueInput?:'auto'|'mouse'|'touch' }) {
   const handoff=usePanHandoff();
   const shelfPlates=getShelfPlates(coherentPhotos,coherentBooks);
   const localCueMemory=useRef(createCueVisitState());
@@ -63,6 +64,14 @@ export default function BookshelfExperience({ onExit, onReady: onDestinationRead
     else if(right?.matches(':hover,:focus-visible'))controls.current?.corner(1);
     else controls.current?.corner(null);
   },[turning,bookOpen,bookLayout?.visible]);
+  useEffect(() => {
+    if (!ready || !motion || preparing) return;
+    for (const to of [cubby - 1, cubby + 1]) {
+      if (to < 0 || to > 2) continue;
+      primeSceneClip(shelfTravelClip(cubby, to, coherentPhotos, coherentBooks));
+    }
+    primeSceneClip(shelfExitSrc(cubby, coherentPhotos, coherentBooks));
+  }, [ready, motion, preparing, cubby, coherentPhotos, coherentBooks]);
   useEffect(() => {
     mounted.current = true;
     // Ready-to-paint plates prevent a black frame at either end of a cubby move.
@@ -207,7 +216,7 @@ export default function BookshelfExperience({ onExit, onReady: onDestinationRead
   }else if(recordPlayback==='finished'){
     cueSpecs.push({id:'open-project',label:'Click',touchLabel:'Tap',selector:'.vinyl-project-controls a',side:'top'});
   }
-  return <section ref={surface} className={`vinyl-experience ${selected !== null ? "vinyl-is-selected" : ""}`} aria-label="Interactive bookshelf" aria-busy={busy} data-cubby={cubby} data-mobile-layout={mobileLayout} data-activity-cues={activityCues} data-selection={typeof selected==='number'?'record':selected??'shelf'}
+  return <section ref={surface} className={`vinyl-experience ${selected !== null ? "vinyl-is-selected" : ""} ${preparing ? "is-preparing" : ""}`} aria-label="Interactive bookshelf" aria-busy={busy} aria-hidden={preparing || undefined} inert={preparing} data-cubby={cubby} data-mobile-layout={mobileLayout} data-responsive={responsiveLayout ? "true" : undefined} data-activity-cues={activityCues} data-selection={typeof selected==='number'?'record':selected??'shelf'}
     onPointerDownCapture={event => {
       if (event.pointerType !== "touch") return;
       if (!event.isPrimary || (selected !== null && !(selected === 'book' && bookOpen && !turning)) || busyRef.current || (event.target as Element).closest("button,a,input,dialog")) { swipe.current = null; return; }
@@ -230,7 +239,7 @@ export default function BookshelfExperience({ onExit, onReady: onDestinationRead
       <img src={shelfPlates[cubby].still} style={{visibility:ready?'hidden':'visible'}} alt={cubby === 0 ? "Books on the upper shelf" : cubby === 1 ? "Five project records and two blank covers in their holder" : "Camera, four personal photographs and globe on the shelf"} />
       <img src={shelfPlates[cubby].background} style={{visibility:ready?'visible':'hidden'}} alt="" aria-hidden="true" />
       <div className="shelf-scene-wrap" style={{ visibility: ready ? "visible" : "hidden" }}>
-        <ShelfScene review={review} coherentPhotos={coherentPhotos} coherentBooks={coherentBooks} mobileLayout={mobileLayout} cueLayout={activityCues} cubby={cubby} motion={motion} controls={controls} onReady={onReady} onFailed={onFailed}
+        <ShelfScene review={review} coherentPhotos={coherentPhotos} coherentBooks={coherentBooks} mobileLayout={mobileLayout} responsiveLayout={responsiveLayout} cueLayout={activityCues} cubby={cubby} motion={motion} controls={controls} onReady={onReady} onFailed={onFailed}
           onCueTargets={activityCues?setCueTargets:undefined}
           onSelect={setSelected} onBook={setBookOpen} onSpread={setSpread} onTurning={setTurning} onCorners={setCorners} onLayout={setBookLayout} onPlayback={onPlayback} onPhoto={setPhoto} />
       </div>
@@ -248,10 +257,10 @@ export default function BookshelfExperience({ onExit, onReady: onDestinationRead
         }} onEnded={() => finishTravel(travel)} onError={() => finishTravel(travel)} />}
       <canvas ref={handoff.canvas} className="shelf-handoff" aria-hidden="true" />
     </div>
-    <button className="cinematic-back" disabled={busy} onClick={() => void moveTo(cubby, true)}>← Room</button>
+    <button className="cinematic-back" disabled={busy} onPointerDown={() => primeSceneClip(shelfExitSrc(cubby, coherentPhotos, coherentBooks), true)} onClick={() => void moveTo(cubby, true)}>← Room</button>
     {selected === null && <>
-      <button className="shelf-arrow shelf-arrow-up" aria-label={`Move up${cubby > 0 ? ` to ${CUBBIES[cubby - 1]}` : ""}`} disabled={busy || (!ready && !failed) || cubby === 0} onClick={() => void moveTo(adjacentCubby(cubby, -1))}><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 13 6-6 6 6" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></button>
-      <button className="shelf-arrow shelf-arrow-down" aria-label={`Move down${cubby < 2 ? ` to ${CUBBIES[cubby + 1]}` : ""}`} disabled={busy || (!ready && !failed) || cubby === 2} onClick={() => void moveTo(adjacentCubby(cubby, 1))}><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 7 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></button>
+      <button className="shelf-arrow shelf-arrow-up" aria-label={`Move up${cubby > 0 ? ` to ${CUBBIES[cubby - 1]}` : ""}`} disabled={busy || (!ready && !failed) || cubby === 0} onPointerDown={() => { if (cubby > 0) primeSceneClip(shelfTravelClip(cubby, cubby - 1, coherentPhotos, coherentBooks), true); }} onClick={() => void moveTo(adjacentCubby(cubby, -1))}><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 13 6-6 6 6" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></button>
+      <button className="shelf-arrow shelf-arrow-down" aria-label={`Move down${cubby < 2 ? ` to ${CUBBIES[cubby + 1]}` : ""}`} disabled={busy || (!ready && !failed) || cubby === 2} onPointerDown={() => { if (cubby < 2) primeSceneClip(shelfTravelClip(cubby, cubby + 1, coherentPhotos, coherentBooks), true); }} onClick={() => void moveTo(adjacentCubby(cubby, 1))}><svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true"><path d="m4 7 6 6 6-6" fill="none" stroke="currentColor" strokeWidth="1.5" /></svg></button>
     </>}
     <div className="vinyl-project-controls">
       {selected === null ? <>

@@ -30,7 +30,7 @@ const appName = (id: DesktopApp) => DESKTOP_APPS.find((app) => app.id === id)!.n
 const COMMANDS = [...Object.values(APP_COMMANDS), "clear", "exit"];
 const APP_LAUNCH_DELAY = 333;
 
-export default function MonitorDesktop({ mobileLayout = false }: { mobileLayout?: boolean } = {}) {
+export default function MonitorDesktop({ mobileLayout = false, responsiveLayout = false }: { mobileLayout?: boolean; responsiveLayout?: boolean } = {}) {
   const [session, dispatch] = useReducer(desktopWindowReducer, INITIAL_DESKTOP_SESSION);
   const { windows, active } = session;
   const [flyout, setFlyout] = useState<Flyout>(null);
@@ -192,7 +192,7 @@ export default function MonitorDesktop({ mobileLayout = false }: { mobileLayout?
   }
   const isMenu = flyout && ["apple", "app", "shell", "edit", "window"].includes(flyout);
 
-  return <main className="windows-desktop-page" data-mobile-layout={mobileLayout ? "review" : undefined}>
+  return <main className="windows-desktop-page" data-mobile-layout={mobileLayout ? "review" : undefined} data-responsive={responsiveLayout ? "true" : undefined}>
     <section ref={desktopRef} tabIndex={-1} className={`windows-desktop-canvas win-desktop mac-desktop${pendingApps ? " is-launching" : ""}`} aria-busy={pendingApps > 0} aria-label="Brian Zeng macOS Tahoe workstation" data-capture-width="1920" data-capture-height="1080"
       onDragStart={(event) => event.preventDefault()}
       onPointerMoveCapture={(event) => {

@@ -18,7 +18,7 @@ test('home uses prerecorded room, without importing a 3D runtime', () => {
 test('desktop and transition assets are conditional, not initial downloads', () => {
   assert.match(source, /showDesktop &&/);
   assert.match(source, /traveling &&/);
-  assert.match(source, /src=\{mobileLayout&&shelfReview\?'\/review\/mobile-desktop':'\/desktop'\}/);
+  assert.match(source, /responsiveLayout\?'\/review\/responsive-desktop':mobileLayout&&shelfReview\?'\/review\/mobile-desktop':'\/desktop'/);
   assert.match(source, /phase === "boot" && bootFinished && desktopLoaded/);
 });
 test('motion preferences, hidden-page pause, keyboard controls and failures are handled', () => {
@@ -38,8 +38,10 @@ test('all shipped room media are present and stay within release budgets', () =>
 
 test('rounded monitor clips share the white highlight revision with all room media', () => {
   assert.match(source, /const MONITOR_MEDIA = "\/room\/v149\/"/);
-  assert.match(source, /phase.startsWith\("vinyl"\) \? SHELF_MEDIA : MEDIA/);
-  assert.match(source, /: `\$\{MONITOR_MEDIA\}monitor-/);
+  assert.match(source, /sceneTransitionSrc\(phase, media\)/);
+  const clips = readFileSync(new URL('../app/components/sceneTransitionCache.ts', import.meta.url), 'utf8');
+  assert.match(clips, /phase\.startsWith\('vinyl'\)/);
+  assert.match(clips, /monitor-in\.mp4/);
   for (const name of ['monitor-in.mp4', 'monitor-out.mp4']) {
     const path = new URL(`../public/room/v149/${name}`, import.meta.url);
     assert.ok(existsSync(path), name);

@@ -10,7 +10,7 @@ import { createShelfPlayer, startShelfPlayback, type PlayerModel } from './shelf
 import {createPolaroidGallery} from './shelfPolaroids';
 import {loadPlaybackFilms,startRestoredPlayback} from './shelfPlaybackStaging';
 import {getShelfPlates} from './panHandoff';
-import {SHELF_MOBILE_QUERY, visibleShelfFit, shelfInspectionScale, type ShelfFit} from './shelfMobileLayout';
+import {SHELF_MOBILE_QUERY, SHELF_PORTRAIT_QUERY, visibleShelfFit, shelfInspectionScale, type ShelfFit} from './shelfMobileLayout';
 
 export type ShelfControls = {
   hover: (selection: ShelfSelection) => void;
@@ -43,6 +43,7 @@ type Props = {
   coherentPhotos?: boolean;
   coherentBooks?: boolean;
   mobileLayout?: boolean;
+  responsiveLayout?: boolean;
   cueLayout?: boolean;
   cubby: number; motion: boolean; controls: MutableRefObject<ShelfControls | null>;
   onReady: () => void; onFailed: () => void; onSelect: (selection: ShelfSelection) => void;
@@ -88,7 +89,8 @@ export default function ShelfScene(props: Props) {
       const inspection = camera.position.clone().addScaledVector(forward, 1.2);
       let mobileFit: ShelfFit | null = null, mobileBookFit: ShelfFit | null = null;
       function refreshMobileFit() {
-        const active = latest.current.mobileLayout && window.matchMedia(SHELF_MOBILE_QUERY).matches;
+        const portrait = Boolean(latest.current.responsiveLayout && window.matchMedia(SHELF_PORTRAIT_QUERY).matches);
+        const active = (latest.current.mobileLayout && window.matchMedia(SHELF_MOBILE_QUERY).matches) || portrait;
         host.dataset.mobileFit = active ? 'true' : 'false';
         if (!active) { mobileFit = null; mobileBookFit = null; return; }
         const viewport = window.visualViewport;
@@ -102,8 +104,8 @@ export default function ShelfScene(props: Props) {
         // Staged notes need an honest empty lane above the cover/photo frames.
         // Reserve it for their whole visit so fading never moves the object.
         mobileFit = visibleShelfFit(stage, visible, fov, aspect,
-          latest.current.cueLayout ? {left:24,right:24,top:72,bottom:54} : undefined);
-        mobileBookFit = visibleShelfFit(stage, visible, fov, aspect, {left:64,right:112,top:14,bottom:54});
+          portrait ? {left:18,right:18,top:18,bottom:18} : latest.current.cueLayout ? {left:24,right:24,top:72,bottom:54} : undefined);
+        mobileBookFit = visibleShelfFit(stage, visible, fov, aspect, portrait ? {left:18,right:18,top:18,bottom:18} : {left:64,right:112,top:14,bottom:54});
       }
       refreshMobileFit();
       const frontPose = camera.quaternion.clone().multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), -Math.PI / 2));

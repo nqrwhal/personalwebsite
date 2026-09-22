@@ -36,7 +36,11 @@ test('approved corrected books media is promoted without review redirect suppres
   const room=read('app/components/CinematicRoom.tsx'),shelf=read('app/components/BookshelfExperience.tsx');
   assert.match(room,/coherentBooks = false/);
   assert.match(room,/booksMedia=coherentBooks\?BOOK_CONSISTENCY_MEDIA:BOOKS_MEDIA/);
-  assert.match(room,/\$\{booksMedia\}\$\{phase\}\.mp4/);
+  assert.match(room,/books: booksMedia/);
+  assert.match(room,/src=\{sceneTransitionSrc\(phase, media\)\}/);
+  const cache=read('app/components/sceneTransitionCache.ts');
+  assert.match(cache,/phase\.startsWith\('books'\)/);
+  assert.match(cache,/\$\{media\.books\}\$\{phase\}\.mp4/);
   assert.match(shelf,/getShelfPlates\(coherentPhotos,coherentBooks\)/);
   assert.match(shelf,/shelfTravelClip\(travel.from,travel.to,coherentPhotos,coherentBooks\)/);
   assert.match(shelf,/<ShelfScene review=\{review\} coherentPhotos=\{coherentPhotos\} coherentBooks=\{coherentBooks\}/);

@@ -1,6 +1,7 @@
 /** Fit inspection objects inside the *visible* part of the cover-sized stage.
  * The authored camera, background and resting shelf geometry never change. */
 export const SHELF_MOBILE_QUERY = '(max-width: 1024px) and (max-height: 600px)';
+export const SHELF_PORTRAIT_QUERY = '(orientation: portrait) and (max-width: 1024px)';
 export type ShelfRect = { left: number; top: number; width: number; height: number };
 export type ShelfFit = { width: number; height: number; x: number; y: number };
 export function visibleShelfFit(stage: ShelfRect, viewport: ShelfRect, fov: number, aspect: number,
