@@ -103,10 +103,9 @@ export default function ShelfScene(props: Props) {
         const fov = Math.max(spec.verticalFov, T.MathUtils.radToDeg(2 * Math.atan(.59 / (2 * 1.2 * aspect))));
         // Staged notes need an honest empty lane above the cover/photo frames.
         // Reserve it for their whole visit so fading never moves the object.
-        // Portrait docks sit outside the contained frame, so only the arrow row is reserved.
         mobileFit = visibleShelfFit(stage, visible, fov, aspect,
-          portrait ? {left:18,right:18,top:56,bottom:18} : latest.current.cueLayout ? {left:24,right:24,top:72,bottom:54} : undefined);
-        mobileBookFit = visibleShelfFit(stage, visible, fov, aspect, portrait ? {left:18,right:18,top:48,bottom:18} : {left:64,right:112,top:14,bottom:54});
+          portrait ? {left:18,right:18,top:18,bottom:18} : latest.current.cueLayout ? {left:24,right:24,top:72,bottom:54} : undefined);
+        mobileBookFit = visibleShelfFit(stage, visible, fov, aspect, portrait ? {left:18,right:18,top:18,bottom:18} : {left:64,right:112,top:14,bottom:54});
       }
       refreshMobileFit();
       const frontPose = camera.quaternion.clone().multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(1, 0, 0), -Math.PI / 2));

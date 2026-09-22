@@ -106,7 +106,9 @@ test('portrait review shares one frame across the movie and the landing scene', 
   assert.doesNotMatch(read('app/page.tsx'), /responsiveLayout/);
   assert.match(css, /@media \(orientation: portrait\) and \(max-width: 1024px\)/);
   assert.match(css, /data-responsive="true"\]\[data-viewport-fit="cover"\] :is\(\.cinematic-stage, \.cinematic-handoff, \.vinyl-render-stage\)/);
-  assert.match(css, /width: min\(100vw, calc\(\(100dvh - 148px\) \* 16 \/ 9\)\)/);
+  assert.match(css, /width: min\(100vw, 177\.777777778dvh\)/);
+  assert.doesNotMatch(css, /data-responsive="true"\] \.cinematic-controls nav button/);
+  assert.doesNotMatch(css, /data-responsive="true"\] \.shelf-arrow-up/);
   const guard = read('app/components/LandscapeGuard.tsx');
   assert.ok(guard.includes('review\\/responsive'));
   assert.ok(guard.includes('(?:-desktop)?'));
